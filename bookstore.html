@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>vue demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> 
+  <style>
+      
+    .red {
+      color: red;
+    }
+    .green {
+      color: green;
+    }
+    .card {
+      border: none;
+      box-shadow: 2px 2px 2px lightgrey;
+      background-image: linear-gradient(to bottom, transparent 70%, lightgrey);
+    }
+    .card:hover {
+      cursor: pointer;
+      background-image: linear-gradient(to bottom, lightgrey 70%, transparent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="book-store">
+    <div class=" d-flex justify-content-between text-light align-item-center mt-1 " style="border-radius: 2px; background-color: rgb(219, 217, 215); padding:6px;">
+      <a href="#" class="fw-bold fs-5" style="color: rgb(34, 31, 27); text-decoration: none; padding-top: 8px;" @click.prevent="cardisvisible = false">Product</a>
+      <div class="d-flex justify-content-between align-items-baseline">
+        <p class="px-2" style="color: rgb(39, 37, 33);">[{{ cart.items.length }}] <span v-if="cart.items.length==1">Item</span> <span v-else>Items</span> </p>
+        <button class="btn btn-primary" @click="cardisvisible = true">WishList</button>
+      </div>
+    </div>
+    <!-- end of nav bar -->
+
+    <div class="row mt-1 align-item-center justify-content-center d-flex justify-content-between" v-if="cardisvisible == false">
+      <div v-for="book in books" class="card" style="width: 20rem; margin: 0.2rem;">
+        <div class="row">
+          <div class="col-12">
+            <img :src="book.image" :title="book.Bookname" class="card-img-top my-1">
+          </div>
+          <div class="col-12">
+            <div class="card-body">
+              <h3 class="text-center">{{ book.Bookname }}</h3>
+              <h5 class="isbn fs-4 item-center text-danger">ISBN: {{ book.isbn }}</h5>
+              <h5>Category: {{ book.Category }}</h5>
+              <h5 :class="[ book.pages > 50 ? 'green' : 'red' ]">NumberOfPages: {{ book.pages }}</h5>
+              <h5>Auther: {{ book.Auther }}</h5>
+              <h5>Price: {{Currency(book.price) }}</h5>
+              <div class="row d-flex m-1 fs-6 fw-bold justify-content-between align-items-baseline" >
+                <p class="col-6" :class="[book.WishList ? 'green' : 'red']">Add to Wishlist<span>{{ book.WishList }}</span></p>
+                <button class="btn btn-primary col-6" :disabled="book.WishList" @click="Addtowishlist(book)">Add to Wish list</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- end of books pages -->
+    <!-- wish list page -->
+    <div class="row" v-if="cardisvisible == true">
+      <!-- this paragraph will appear only when the page has no books -->
+      <div class="m-auto text-center col-12 text-danger my-2 fs-1 fw-bold" v-if="cart.items.length == 0">Sorry your wish list is empty!!</div>
+      <!-- when the wishlist has books -->
+      <table class="table table-border m-auto" style="width: 90%;" v-if="cart.items.length > 0">
+        <thead>
+          <tr class="fw-bold " style=" font-size: 20px;">
+            <td style="color: rgb(53, 47, 47);">ISBN</td>
+            <td style="color: rgb(53, 47, 47);">NAME</td>
+            <td style="color: rgb(53, 47, 47);">Category</td>
+            <td style="color: rgb(53, 47, 47);">Author</td>
+            <td style="color: rgb(53, 47, 47);">Price</td>
+            <td style="color: rgb(53, 47, 47);">Delete book</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in cart.items">
+            <td>{{ item.book.isbn }}</td>
+            <td>{{ item.book.Bookname }}</td>
+            <td>{{ item.book.Category }}</td>
+            <td>{{ item.book.Auther }}</td>
+            <td>{{ item.book.price }}</td>
+            <td>
+                <button class="btn btn-danger" @click="removeFromList(item.book)">Delete book</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- end of wish list page -->
+  </div>
+  <script src="./arrayofbook.js"></script>
+  <script>
+    const App = Vue.createApp({
+      data() {
+        return {
+          books: books,
+          cardisvisible: false,
+          cart: {
+            items: []
+          }
+        };
+      },
+      methods: {
+        Addtowishlist(book) {
+          book.WishList = true;
+          this.cart.items.push({
+            book: book
+          });
+        },
+        removeFromList(book) {    
+          const index = this.cart.items.findIndex(item => item.book === book);
+          if (index !== -1) {      
+              this.cart.items.splice(index, 1);
+              book.WishList = false; 
+          }
+        },
+        Currency(value) {
+          return Intl.NumberFormat('ar-EG', {
+              style: 'currency',
+              currency: 'EGP',
+              minimumFractionDigits: 0
+          }).format(value);
+        }
+      }
+    });
+    App.mount("#book-store");
+  </script>
+</body>
+</html>
